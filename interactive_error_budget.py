@@ -139,7 +139,7 @@ ax1 = plt.subplot(3, 1, 1)
 ax2 = plt.subplot(3, 1, 2, projection="polar")
 ax3 = plt.subplot(3, 1, 3)
 fig.suptitle(
-    "Position & Velocity Error Budget Analysis (NO DRAG)\nDrag to explore error tolerances",
+    "Position & Velocity Error Budget Analysis (NO DRAG)\nClick to explore error tolerances",
     fontsize=14,
     fontweight="bold",
 )
@@ -251,7 +251,7 @@ def repaint_ax2():
     ax2.set_theta_direction(1)
     ax2.set_thetamin(5)
     ax2.set_thetamax(85)
-    ax2.set_title("Angle-Speed Space (Drag to adjust)", fontsize=11, pad=20)
+    ax2.set_title("Angle-Speed Space (Click to adjust)", fontsize=11, pad=20)
     ax2.grid(True, alpha=0.3)
 
     # Plot current shot
