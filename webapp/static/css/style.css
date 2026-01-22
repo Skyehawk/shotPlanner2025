@@ -22,7 +22,7 @@ body {
 }
 
 #polar-plot {
-    height: 40vh; /* Make polar plot square-ish or fit */
+    height: 40vh;
     width: 40vh;
 }
 

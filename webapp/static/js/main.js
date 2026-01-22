@@ -132,22 +132,40 @@ async function init() {
     };
 
     layout.polar = {
-        title: 'Angle-Speed Space (Click to adjust)',
+        // title: 'Angle-Speed Space (Click to adjust)', // for readability
         polar: {
             radialaxis: {range: [0, 15], visible: true},
             angularaxis: {
                 direction: "counterclockwise",
                 rotation: 0,
-                range: [0, 90] // limit to first quadrant
             }
         },
         margin: {t: 30, b: 30, l: 30, r: 30},
         dragmode: false,
+        hovermode: 'closest',
         showlegend: false
     };
     
     Plotly.newPlot(polarDiv, [zoneTrace, curStateTrace], layout.polar, {displayModeBar: false});
-    
+
+    // Fix cursor disappearing
+    setTimeout(() => {
+        const cursorNone = polarDiv.querySelectorAll('.cursor-none');
+        cursorNone.forEach(el => {
+            el.classList.remove('cursor-none');
+            el.style.cursor = 'crosshair';
+        });
+    }, 100);
+
+    const observer = new MutationObserver(() => {
+        const cursorNone = polarDiv.querySelectorAll('.cursor-none');
+        cursorNone.forEach(el => {
+            el.classList.remove('cursor-none');
+            el.style.cursor = 'crosshair';
+        });
+    });
+    observer.observe(polarDiv, { attributes: true, subtree: true, attributeFilter: ['class'] });
+
     // Setup Budget Plot
     const rangeTrace = {
         x: [0, 0], // min, max
@@ -260,11 +278,7 @@ function setupInteractions() {
     });
 }
 
-function handleTrajMove(e) {
-    // Convert logic
-    // We need to map raw pixel x, y to data x, y using standard Plotly calc
-    // Or simpler: use bounding box ratio if fixed axis ranges (which we established)
-    
+function handleTrajMove(e) {    
     const rect = trajDiv.getBoundingClientRect();
     const plotArea = trajDiv._fullLayout; // access internal layout for converters
     const xaxis = plotArea.xaxis;
@@ -294,7 +308,6 @@ function handleBudgetMove(e) {
     const xPx = e.clientX - rect.left - plotArea.margin.l;
     const dataX = xaxis.p2c(xPx); // This gives speed
     
-    // Valid check (clamp to sensible 0-15 range used in plot)
     const newV = Math.max(0, Math.min(15, dataX));
     
     state.v = newV;
@@ -302,9 +315,7 @@ function handleBudgetMove(e) {
 }
 
 function handlePolarMove(e) {
-    // Convert pixel to polar r, theta? 
-    // Plotly Polar is slightly complex to reverse engineer pixels.
-    // Simpler hack: We know the center of the plot div (roughly) or use _fullLayout.polar
+    // Convert pixel to polar r, theta
     
     const layout = polarDiv._fullLayout;
     
@@ -324,14 +335,12 @@ function handlePolarMove(e) {
     
     // Standard Cartesian to Polar
     // Note: y is positive down in DOM. In Plotly polar with standard orientation (0 at 3 o'clock, CCW):
-    // Standard math: atan2(-y, x) gives angle from x-axis (right), increasing CCW.
-    // Plot settings: direction "counterclockwise", rotation 0.
+    // atan2(-y, x) gives angle from x-axis (right), increasing CCW.
+    // direction "counterclockwise", rotation 0.
     
     const r = Math.sqrt(x*x + y*y);
 
     // Calculate scaling factor
-    // The radius of the plot in pixels corresponds to the range of the radial axis
-    // Assuming the plot fills the available space (limiting dimension)
     const plotWidth = width - margin.l - margin.r;
     const plotHeight = height - margin.t - margin.b;
     const maxRadiusPx = Math.min(plotWidth, plotHeight) / 2;
@@ -344,8 +353,7 @@ function handlePolarMove(e) {
     let theta = Math.atan2(-y, x) * (180 / Math.PI); // -y to flip y axis (screen coords) to cartesian
     if (theta < 0) theta += 360;
     
-    // Constraints check (dataR must be somewhat valid, theta between 0 and 90 based on visual)
-    if (dataR < maxR * 1.1) { // allow small overflow for usability
+    if (dataR < maxR * 1.1) { // allow small overflow
         state.v = Math.max(0, dataR); // Clamp non-negative
         state.angle = theta;
         scheduleUpdate();

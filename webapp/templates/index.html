@@ -3,22 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shot Planner 2025</title>
+    <title>Shot Planner 2026</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Shot Planner 2025</h1>
+<body class="bg-slate-50 min-h-screen py-8 px-4 font-sans text-slate-900">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <header class="text-center pb-4">
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Shot Planner 2025</h1>
+            <p class="text-slate-500 mt-1 text-sm">Interactive Ballistics & Error Budgeting</p>
+        </header>
+
+        <!-- Graph 1: Trajectory -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <span class="font-semibold text-slate-700 text-sm uppercase tracking-wider">Trajectory</span>
+                <span class="text-xs text-slate-400">Click to position shooter</span>
+            </div>
+            <div id="traj-plot" class="w-full h-[450px]"></div>
+        </div>
         
-        <!-- Graph 1: Trajectory (Heatmap background with shooter and trajectory) -->
-        <div id="traj-plot" class="plot-container"></div>
-        
-        <!-- Graph 2: Polar (Angle/Speed space) -->
-        <div id="polar-plot" class="plot-container"></div>
-        
-        <!-- Graph 3: Budget (Velocity) -->
-        <div id="budget-plot" class="plot-container"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Graph 2: Polar (Angle/Speed space) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col items-center">
+                 <div class="w-full px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <span class="font-semibold text-slate-700 text-sm uppercase tracking-wider">Angle vs Speed</span>
+                    <span class="text-xs text-slate-400">Click to adjust</span>
+                </div>
+                <div id="polar-plot" class="w-full h-[400px] max-w-[400px]"></div>
+            </div>
+            
+            <!-- Graph 3: Budget (Velocity) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                 <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <span class="font-semibold text-slate-700 text-sm uppercase tracking-wider">Velocity Budget</span>
+                     <span class="text-xs text-slate-400">Click to test</span>
+                </div>
+                <div class="flex-grow flex items-center justify-center p-4">
+                     <div id="budget-plot" class="w-full h-[250px]"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/static/js/main.js"></script>

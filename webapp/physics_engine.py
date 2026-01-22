@@ -23,15 +23,18 @@ def get_speed_func_squared(startpt, endpt):
 def get_ang_speed_space(xpos, ypos):
     f_far_squared = get_speed_func_squared((xpos, ypos), (rim_width / 2, rim_height))
     f_near_squared = get_speed_func_squared((xpos, ypos), (-rim_width / 2, rim_height))
+
+    # tan(theta) = delta_t(1/(delta_x_far) + 1/(delta_x_near))
+    dy = rim_height - ypos
+    dx_far = (rim_width / 2) - xpos
+    dx_near = (-rim_width / 2) - xpos
     
-    f_squared_diff = lambda a: f_far_squared(a) - f_near_squared(a)
-    
-    try:
-        rad85 = radians(85) # try 85 radians as initial guess
-        intersection = fsolve(f_squared_diff, rad85)[0]
-    except:
-        intersection = rad85
-        
+    intersection = radians(85)
+    # Avoid division by zero
+    if abs(dx_far) > 1e-4 and abs(dx_near) > 1e-4:
+        tan_int = dy * (1/dx_far + 1/dx_near)
+        intersection = np.arctan(tan_int)
+
     ang_lower_bound = max(intersection, radians(5))
     ang_upper_bound = radians(85)
     
@@ -140,13 +143,17 @@ def get_velocity_budget(x0, y0, angle_rad):
     v_max_sq_func = get_speed_func_squared((x0, y0), (rim_width/2 - cargo_radius, rim_height))
     
     # speed squared at angle a
-    try:
-        v_min = sqrt(v_min_sq_func(angle_rad))
-        v_max = sqrt(v_max_sq_func(angle_rad))
-    except:
-        v_min = 0
-        v_max = 0
-        
+    v_min_sq = v_min_sq_func(angle_rad)
+    v_max_sq = v_max_sq_func(angle_rad)
+
+    # handle nan and inf
+    v_min_sq = np.nan_to_num(v_min_sq, nan=-1.0, posinf=-1.0, neginf=-1.0)
+    v_max_sq = np.nan_to_num(v_max_sq, nan=-1.0, posinf=-1.0, neginf=-1.0)
+
+    # Prevent taking sqrt of negative numbers
+    v_min = float(sqrt(max(0.0, v_min_sq)))
+    v_max = float(sqrt(max(0.0, v_max_sq)))
+
     return v_min, v_max
 
 def get_position_budget(x0, y0, v, angle_rad):
